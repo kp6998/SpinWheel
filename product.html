@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="product.css">
+</head>
+<body>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0px;">    
+        <h1>Product Details</h1>
+        <a href="index.html" style="right:10px;padding:8px 16px;background:#007bff;color:#fff;text-decoration:none;border-radius:5px;">Back to Spin Wheel</a> 
+    </div>
+
+        <form id="headerForm">
+            <input type="text" id="headerInput" placeholder="Enter Header" required disabled>
+            <button type="button" id="editHeaderBtn">Edit</button>
+            <button type="submit" id="saveHeaderBtn" style="display:none;">Save</button>
+        </form>
+
+        <form id="productForm">
+                <input type="text" id="productName" placeholder="Product Name" required>
+                <input type="number" id="productCount" placeholder="Count" min="1" required>
+                <button type="submit" class="submit-btn">Add Product</button>
+        </form>
+        <div id="productList"></div>
+            <script src="product.js"></script>
+            <script>
+                // Header edit/save logic only here
+                const headerInput = document.getElementById('headerInput');
+                const editHeaderBtn = document.getElementById('editHeaderBtn');
+                const saveHeaderBtn = document.getElementById('saveHeaderBtn');
+                function loadHeader() {
+                    const header = localStorage.getItem('header') || '';
+                    headerInput.value = header;
+                    headerInput.disabled = true;
+                    saveHeaderBtn.style.display = 'none';
+                    editHeaderBtn.style.display = '';
+                }
+                editHeaderBtn.onclick = function() {
+                    headerInput.disabled = false;
+                    saveHeaderBtn.style.display = '';
+                    editHeaderBtn.style.display = 'none';
+                    headerInput.focus();
+                };
+                document.getElementById('headerForm').onsubmit = function(e) {
+                    e.preventDefault();
+                    localStorage.setItem('header', headerInput.value.trim());
+                    loadHeader();
+                };
+                loadHeader();
+            </script>
+</body>
+</html>

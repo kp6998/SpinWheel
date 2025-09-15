@@ -1,31 +1,129 @@
 <html lang="en">
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spin Wheel App</title>
-    <!-- Google Font -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap"
-      rel="stylesheet"
-    />
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="index.css" />
-  </head>
-  <body>
-    <div class="wrapper">
-      <div class="container">
-        <canvas id="wheel"></canvas>
-        <button id="spin-btn">Spin</button>
-        <img src="Icons\left-arrow.png" alt="spinner arrow" />
-      </div>
-      <div id="final-value">
-        <p>Click On The Spin Button To Start</p>
-      </div>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spin Wheel App</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet" />
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="index.css" />
+  <!-- Link to Product Page -->
+</head>
+
+<body>
+  <div id="headerBar" style="display:flex;justify-content:center;align-items:center;padding:16px;">
+    <h2 id="mainHeader" style="margin:0;">Spin Wheel</h2>
+  </div>
+  <!-- <a href="product.html" style="position:absolute;top:10px;right:10px;padding:8px 16px;background:#007bff;color:#fff;text-decoration:none;border-radius:5px;">Product Details</a> -->
+  <div class="wrapper">
+    <div class="container">
+      <canvas id="wheel"></canvas>
+      <button id="spin-btn">Spin</button>
+      <img src="Icons\left-arrow.png" alt="spinner arrow" />
     </div>
-    <!-- Chart JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <!-- Chart JS Plugin for displaying text over chart -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.1.0/chartjs-plugin-datalabels.min.js"></script>
-    <!-- Script -->
-    <script src="index.js"></script>
-  </body>
+    <div id="final-value">
+      <p>Click On The Spin Button To Start</p>
+    </div>
+  </div>
+  <!-- Chart JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <!-- Chart JS Plugin for displaying text over chart -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.1.0/chartjs-plugin-datalabels.min.js"></script>
+  <!-- Game Over Modal -->
+  <div id="gameOverModal"
+    style="display:none;position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;">
+    <div style="background:#fff;padding:2em 3em;border-radius:1em;text-align:center;box-shadow:0 2px 16px #0003;">
+      <h1 style="color:#d32f2f;">Game Over</h1>
+      <p>All product counts have reached 0.</p>
+    </div>
+  </div>
+  <!-- Victory Modal -->
+  <div id="victoryModal"
+    style="display:none;position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;">
+    <div
+      style="background:#fff;padding:2em 3em;border-radius:1em;text-align:center;box-shadow:0 2px 16px #0003;position:relative;overflow:hidden;">
+      <button id="closeVictory"
+        style="position:absolute;top:10px;right:10px;background:none;border:none;font-size:2em;cursor:pointer;">&times;</button>
+      <div id="victoryAnimation" style="margin-bottom:1em;"></div>
+      <h1 style="color:#388e3c;">Congratulations!</h1>
+      <p id="victoryText"></p>
+    </div>
+  </div>
+  <!-- Script -->
+  <script>
+    // Check for exactly 6 products in localStorage
+    (function () {
+      try {
+        var products = JSON.parse(localStorage.getItem('products') || '[]');
+        if (!Array.isArray(products) || products.length !== 6) {
+          alert('You must add exactly 6 products before spinning!');
+          window.location.href = 'product.html';
+        }
+      } catch (e) {
+        alert('You must add exactly 6 products before spinning!');
+        window.location.href = 'product.html';
+      }
+    })();
+    // Expose showGameOverModal for index.js
+    window.showGameOverModal = function () {
+      var modal = document.getElementById('gameOverModal');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    }
+    window.showVictoryModal = function (productName) {
+      var modal = document.getElementById('victoryModal');
+      var text = document.getElementById('victoryText');
+      var anim = document.getElementById('victoryAnimation');
+      if (modal && text && anim) {
+        text.textContent = `You won: ${productName}!`;
+        modal.style.display = 'flex';
+        // Start confetti animation interval
+        if (window._confettiInterval) clearInterval(window._confettiInterval);
+        anim.innerHTML = '';
+        window._confettiInterval = setInterval(() => {
+          for (let i = 0; i < 6; i++) {
+            let conf = document.createElement('div');
+            conf.style.position = 'absolute';
+            conf.style.left = Math.random() * 100 + '%';
+            conf.style.top = '-30px';
+            conf.style.width = '12px';
+            conf.style.height = '12px';
+            conf.style.background = `hsl(${Math.random() * 360},80%,60%)`;
+            conf.style.borderRadius = '50%';
+            conf.style.opacity = 0.8;
+            conf.style.animation = `fall 1.2s linear ${Math.random()}s forwards`;
+            anim.appendChild(conf);
+          }
+        }, 250);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      var closeBtn = document.getElementById('closeVictory');
+      if (closeBtn) {
+        closeBtn.onclick = function () {
+          document.getElementById('victoryModal').style.display = 'none';
+          if (window._confettiInterval) clearInterval(window._confettiInterval);
+          document.getElementById('victoryAnimation').innerHTML = '';
+        }
+      }
+    });
+    // Confetti animation keyframes
+    var style = document.createElement('style');
+    style.innerHTML = `@keyframes fall { to { transform: translateY(300px) rotate(360deg); opacity:0.2; } }`;
+    document.head.appendChild(style);
+  </script>
+  <script src="index.js"></script>
+  <script>
+    // Only display header from localStorage, no edit here
+    const mainHeader = document.getElementById('mainHeader');
+    function loadHeaderIndex() {
+      const header = localStorage.getItem('header') || 'Spin Wheel';
+      mainHeader.textContent = header;
+    }
+    loadHeaderIndex();
+  </script>
+</body>
+
 </html>
